@@ -70,35 +70,56 @@ bool KotelnikovaATaskOMP::PreProcessingImpl() {
   return true;
 }
 
+namespace {
+std::vector<double> ComputeColumn(const SparseMatrixCCS &a, const SparseMatrixCCS &b, int col_idx) {
+  std::vector<double> temp(a.rows, 0.0);
+
+  for (int b_idx = b.col_ptrs[col_idx]; b_idx < b.col_ptrs[col_idx + 1]; ++b_idx) {
+    const int k = b.row_indices[b_idx];
+    const double b_val = b.values[b_idx];
+
+    for (int a_idx = a.col_ptrs[k]; a_idx < a.col_ptrs[k + 1]; ++a_idx) {
+      const int i = a.row_indices[a_idx];
+      temp[i] += a.values[a_idx] * b_val;
+    }
+  }
+
+  return temp;
+}
+
+int CountNonZero(const std::vector<double> &column, double epsilon) {
+  int count = 0;
+  for (double val : column) {
+    if (std::abs(val) > epsilon) {
+      ++count;
+    }
+  }
+  return count;
+}
+
+void FillColumn(const std::vector<double> &column, double epsilon, std::vector<int> &row_indices,
+                std::vector<double> &values, int start_pos) {
+  int pos = start_pos;
+  for (int i = 0; i < static_cast<int>(column.size()); ++i) {
+    if (std::abs(column[i]) > epsilon) {
+      row_indices[pos] = i;
+      values[pos] = column[i];
+      ++pos;
+    }
+  }
+}
+}  // namespace
+
 SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, const SparseMatrixCCS &b) {
   SparseMatrixCCS result(a.rows, b.cols);
 
   const double epsilon = 1e-10;
-
   std::vector<int> col_start(b.cols, 0);
 
 #pragma omp parallel for default(none) shared(a, b, col_start, epsilon) schedule(dynamic, 8)
   for (int j = 0; j < b.cols; ++j) {
-    std::vector<double> temp(a.rows, 0.0);
-
-    for (int b_idx = b.col_ptrs[j]; b_idx < b.col_ptrs[j + 1]; ++b_idx) {
-      const int k = b.row_indices[b_idx];
-      const double b_val = b.values[b_idx];
-
-      for (int a_idx = a.col_ptrs[k]; a_idx < a.col_ptrs[k + 1]; ++a_idx) {
-        const int i = a.row_indices[a_idx];
-        temp[i] += a.values[a_idx] * b_val;
-      }
-    }
-
-    int nnz_in_col = 0;
-    for (int i = 0; i < a.rows; ++i) {
-      if (std::abs(temp[i]) > epsilon) {
-        ++nnz_in_col;
-      }
-    }
-
-    col_start[j] = nnz_in_col;
+    std::vector<double> column = ComputeColumn(a, b, j);
+    col_start[j] = CountNonZero(column, epsilon);
   }
 
   std::vector<int> col_ptr(b.cols + 1, 0);
@@ -113,26 +134,8 @@ SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, 
 
 #pragma omp parallel for default(none) shared(a, b, result, col_ptr, epsilon) schedule(dynamic, 8)
   for (int j = 0; j < b.cols; ++j) {
-    std::vector<double> temp(a.rows, 0.0);
-
-    for (int b_idx = b.col_ptrs[j]; b_idx < b.col_ptrs[j + 1]; ++b_idx) {
-      const int k = b.row_indices[b_idx];
-      const double b_val = b.values[b_idx];
-
-      for (int a_idx = a.col_ptrs[k]; a_idx < a.col_ptrs[k + 1]; ++a_idx) {
-        const int i = a.row_indices[a_idx];
-        temp[i] += a.values[a_idx] * b_val;
-      }
-    }
-
-    int pos = col_ptr[j];
-    for (int i = 0; i < a.rows; ++i) {
-      if (std::abs(temp[i]) > epsilon) {
-        result.row_indices[pos] = i;
-        result.values[pos] = temp[i];
-        ++pos;
-      }
-    }
+    std::vector<double> column = ComputeColumn(a, b, j);
+    FillColumn(column, epsilon, result.row_indices, result.values, col_ptr[j]);
   }
 
   return result;
