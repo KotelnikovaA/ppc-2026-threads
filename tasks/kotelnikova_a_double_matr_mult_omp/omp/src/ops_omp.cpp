@@ -100,9 +100,9 @@ int CountNonZero(const std::vector<double> &column, double epsilon) {
 void FillColumn(const std::vector<double> &column, double epsilon, std::vector<int> &row_indices,
                 std::vector<double> &values, int start_pos) {
   int pos = start_pos;
-  for (int i = 0; i < static_cast<int>(column.size()); ++i) {
+  for (size_t i = 0; i < column.size(); ++i) {
     if (std::abs(column[i]) > epsilon) {
-      row_indices[pos] = i;
+      row_indices[pos] = static_cast<int>(i);
       values[pos] = column[i];
       ++pos;
     }
