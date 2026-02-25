@@ -108,6 +108,7 @@ void FillColumn(const std::vector<double> &column, double epsilon, std::vector<i
     }
   }
 }
+
 }  // namespace
 
 SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, const SparseMatrixCCS &b) {
