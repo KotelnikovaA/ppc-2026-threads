@@ -2,7 +2,6 @@
 
 #include <omp.h>
 
-#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <vector>
@@ -76,10 +75,9 @@ SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, 
 
   const double epsilon = 1e-10;
 
-  std::vector<int> col_start(b.cols + 1, 0);
-  std::vector<int> col_end(b.cols + 1, 0);
+  std::vector<int> col_start(b.cols, 0);
 
-#pragma omp parallel for schedule(dynamic, 8)
+#pragma omp parallel for default(none) shared(a, b, col_start, epsilon) schedule(dynamic, 8)
   for (int j = 0; j < b.cols; ++j) {
     std::vector<double> temp(a.rows, 0.0);
 
@@ -96,7 +94,7 @@ SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, 
     int nnz_in_col = 0;
     for (int i = 0; i < a.rows; ++i) {
       if (std::abs(temp[i]) > epsilon) {
-        nnz_in_col++;
+        ++nnz_in_col;
       }
     }
 
@@ -108,12 +106,12 @@ SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, 
     col_ptr[j + 1] = col_ptr[j] + col_start[j];
   }
 
-  int total_nnz = col_ptr[b.cols];
+  const int total_nnz = col_ptr[b.cols];
   result.values.resize(total_nnz);
   result.row_indices.resize(total_nnz);
   result.col_ptrs = col_ptr;
 
-#pragma omp parallel for schedule(dynamic, 8)
+#pragma omp parallel for default(none) shared(a, b, result, col_ptr, epsilon) schedule(dynamic, 8)
   for (int j = 0; j < b.cols; ++j) {
     std::vector<double> temp(a.rows, 0.0);
 
@@ -132,7 +130,7 @@ SparseMatrixCCS KotelnikovaATaskOMP::MultiplyMatrices(const SparseMatrixCCS &a, 
       if (std::abs(temp[i]) > epsilon) {
         result.row_indices[pos] = i;
         result.values[pos] = temp[i];
-        pos++;
+        ++pos;
       }
     }
   }
