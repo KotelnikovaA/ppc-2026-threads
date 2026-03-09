@@ -5,8 +5,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
+#include "romanov_m_matrix_ccs/common/include/common.hpp"
 #include "util/include/util.hpp"
 
 namespace romanov_m_matrix_ccs {
@@ -24,7 +26,7 @@ bool RomanovMMatrixCCSOMP::PreProcessingImpl() {
   return true;
 }
 
-void RomanovMMatrixCCSOMP::MultiplyColumn(int col_index, const MatrixCCS &a, const MatrixCCS &b,
+void RomanovMMatrixCCSOMP::MultiplyColumn(size_t col_index, const MatrixCCS &a, const MatrixCCS &b,
                                           std::vector<double> &temp_v, std::vector<size_t> &temp_r) {
   std::vector<double> accumulator(a.rows_num, 0.0);
   std::vector<bool> row_mask(a.rows_num, false);
@@ -68,7 +70,7 @@ bool RomanovMMatrixCCSOMP::RunImpl() {
 #pragma omp parallel num_threads(ppc::util::GetNumThreads()) default(none) shared(a, b, temp_vals, temp_rows)
   {
 #pragma omp for schedule(dynamic)
-    for (int j = 0; j < static_cast<int>(b.cols_num); ++j) {
+    for (size_t j = 0; j < b.cols_num; ++j) {
       MultiplyColumn(j, a, b, temp_vals[j], temp_rows[j]);
     }
   }
