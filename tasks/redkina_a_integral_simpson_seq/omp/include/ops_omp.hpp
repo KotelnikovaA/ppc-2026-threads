@@ -1,3 +1,4 @@
+// redkina_a_integral_simpson_seq/omp/include/ops_omp.hpp
 #pragma once
 
 #include <functional>
@@ -21,6 +22,9 @@ class RedkinaAIntegralSimpsonOMP : public BaseTask {
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
+
+  // Вспомогательные функции (могут быть статическими или свободными)
+  static std::vector<int> LinearToIndices(size_t lin, const std::vector<int> &n);
 
   std::function<double(const std::vector<double> &)> func_;
   std::vector<double> a_;
