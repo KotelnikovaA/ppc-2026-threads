@@ -59,7 +59,6 @@ bool RedkinaAIntegralSimpsonOMP::RunImpl() {
   }
 
   // Общее количество узлов (комбинаций индексов)
-  // Используем знаковый тип для индекса цикла в OpenMP
   using index_t = long long;
   index_t total_nodes = 1;
   for (int ni : n_) {
@@ -68,28 +67,38 @@ bool RedkinaAIntegralSimpsonOMP::RunImpl() {
 
   double global_sum = 0.0;
 
+  // Создаём локальные копии ссылок на данные класса для использования в OpenMP
+  const std::vector<double> &a_ref = a_;
+  const std::vector<double> &b_ref = b_;
+  const std::vector<int> &n_ref = n_;
+  const std::vector<double> &h_ref = h;
+  const std::function<double(const std::vector<double> &)> &func_ref = func_;
+  const size_t dim_val = dim;
+  const index_t total_nodes_val = total_nodes;
+
 // Распараллеливание: каждый поток создаёт свои локальные векторы один раз
-#pragma omp parallel
+#pragma omp parallel default(none) shared(a_ref, b_ref, n_ref, h_ref, func_ref, dim_val, total_nodes_val) \
+    reduction(+ : global_sum)
   {
     // Локальные для потока векторы (переиспользуются на всех итерациях потока)
-    std::vector<double> local_point(dim);
-    std::vector<int> local_indices(dim);
+    std::vector<double> local_point(dim_val);
+    std::vector<int> local_indices(dim_val);
 
-#pragma omp for reduction(+ : global_sum)
-    for (index_t lin = 0; lin < total_nodes; ++lin) {
+#pragma omp for
+    for (index_t lin = 0; lin < total_nodes_val; ++lin) {
       // Преобразование линейного индекса в многомерные индексы
       index_t tmp = lin;
       double weight = 1.0;
-      for (int d = static_cast<int>(dim) - 1; d >= 0; --d) {
-        const int base = n_[d] + 1;
+      for (int d = static_cast<int>(dim_val) - 1; d >= 0; --d) {
+        const int base = n_ref[d] + 1;
         const int idx = static_cast<int>(tmp % base);
         tmp /= base;
         local_indices[d] = idx;
-        local_point[d] = a_[d] + static_cast<double>(idx) * h[d];
+        local_point[d] = a_ref[d] + static_cast<double>(idx) * h_ref[d];
 
         // Коэффициент Симпсона для данного измерения
         int coeff;
-        if (idx == 0 || idx == n_[d]) {
+        if (idx == 0 || idx == n_ref[d]) {
           coeff = 1;
         } else if (idx % 2 == 1) {
           coeff = 4;
@@ -100,7 +109,7 @@ bool RedkinaAIntegralSimpsonOMP::RunImpl() {
       }
 
       // Добавление вклада узла
-      global_sum += weight * func_(local_point);
+      global_sum += weight * func_ref(local_point);
     }
   }
 
