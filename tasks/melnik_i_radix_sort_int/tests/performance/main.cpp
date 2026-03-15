@@ -5,6 +5,7 @@
 #include <random>
 #include <vector>
 
+#include "melnik_i_radix_sort_int/common/include/common.hpp"
 #include "melnik_i_radix_sort_int/omp/include/ops_omp.hpp"
 #include "melnik_i_radix_sort_int/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
@@ -35,7 +36,7 @@ class MelnikIRadixSortIntPerfTests : public ppc::util::BaseRunPerfTests<InType, 
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return std::is_sorted(output_data.begin(), output_data.end());
+    return std::ranges::is_sorted(output_data);
   }
 
   InType GetTestInputData() final {

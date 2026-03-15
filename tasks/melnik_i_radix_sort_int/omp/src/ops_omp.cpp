@@ -4,8 +4,10 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdint>
+#include <utility>
 #include <vector>
+
+#include "melnik_i_radix_sort_int/common/include/common.hpp"
 
 namespace melnik_i_radix_sort_int {
 
@@ -44,7 +46,7 @@ bool MelnikIRadixSortIntOMP::PostProcessingImpl() {
 }
 
 int MelnikIRadixSortIntOMP::GetMaxValue(const OutType &data) {
-  return *std::max_element(data.begin(), data.end());
+  return *std::ranges::max_element(data);
 }
 
 void MelnikIRadixSortIntOMP::ParallelCountingSort(OutType &data, int exp, int offset) {
@@ -56,14 +58,14 @@ void MelnikIRadixSortIntOMP::ParallelCountingSort(OutType &data, int exp, int of
   const int num_threads = omp_get_max_threads();
   const int chunk_size = (n + num_threads - 1) / num_threads;
 
-  std::vector<int> local_counts(num_threads * kBuckets, 0);
+  std::vector<int> local_counts(static_cast<long>(num_threads) * kBuckets, 0);
 
 #pragma omp parallel default(none) shared(data, local_counts, n, chunk_size, exp, offset)
   {
     const int thread_id = omp_get_thread_num();
     const int start = thread_id * chunk_size;
     const int end = (start + chunk_size < n) ? (start + chunk_size) : n;
-    int *local_count = &local_counts[thread_id * kBuckets];
+    int *local_count = &local_counts[static_cast<long>(thread_id) * kBuckets];
 
     for (int i = start; i < end; i++) {
       int digit = ((data[i] + offset) / exp) % kBuckets;
@@ -74,9 +76,9 @@ void MelnikIRadixSortIntOMP::ParallelCountingSort(OutType &data, int exp, int of
   std::array<int, kBuckets> global_count{};
   global_count.fill(0);
 
-  for (int t = 0; t < num_threads; t++) {
-    for (int b = 0; b < kBuckets; b++) {
-      global_count[b] += local_counts[t * kBuckets + b];
+  for (int thr = 0; thr < num_threads; thr++) {
+    for (int buck = 0; buck < kBuckets; buck++) {
+      global_count[buck] += local_counts[thr * kBuckets + buck];
     }
   }
 
@@ -95,12 +97,12 @@ void MelnikIRadixSortIntOMP::ParallelCountingSort(OutType &data, int exp, int of
     const int end = (start + chunk_size < n) ? (start + chunk_size) : n;
 
     std::array<int, kBuckets> local_pos{};
-    for (int b = 0; b < kBuckets; b++) {
-      int base = start_pos[b];
+    for (int buck = 0; buck < kBuckets; buck++) {
+      int base = start_pos[buck];
       for (int t2 = 0; t2 < thread_id; t2++) {
-        base += local_counts[t2 * kBuckets + b];
+        base += local_counts[t2 * kBuckets + buck];
       }
-      local_pos[b] = base;
+      local_pos[buck] = base;
     }
 
     for (int i = start; i < end; i++) {
@@ -118,7 +120,7 @@ void MelnikIRadixSortIntOMP::RadixSort(OutType &data) {
   }
 
   int max_val = GetMaxValue(data);
-  int min_val = *std::min_element(data.begin(), data.end());
+  int min_val = *std::ranges::min_element(data);
 
   if (min_val >= 0) {
     for (int exp = 1; max_val / exp > 0; exp <<= kBitsPerDigit) {
