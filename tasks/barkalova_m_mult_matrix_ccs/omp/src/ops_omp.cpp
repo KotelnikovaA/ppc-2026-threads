@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "barkalova_m_mult_matrix_ccs/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace barkalova_m_mult_matrix_ccs {
 
