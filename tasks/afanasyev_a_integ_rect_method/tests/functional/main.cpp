@@ -60,9 +60,10 @@ TEST_P(AfanasyevARunFuncTests, MidpointApproximation) {
 const std::array<TestType, 3> kTestParam = {std::make_tuple(10, "n10"), std::make_tuple(30, "n30"),
                                             std::make_tuple(80, "n80")};
 
-const auto kTestTasksList = 
-std::tuple_cat(ppc::util::AddFuncTask<AfanasyevAIntegRectMethodSEQ, InType>(kTestParam, PPC_SETTINGS_afanasyev_a_integ_rect_method),
-               ppc::util::AddFuncTask<AfanasyevAIntegRectMethodOMP, InType>(kTestParam, PPC_SETTINGS_afanasyev_a_integ_rect_method));
+const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<AfanasyevAIntegRectMethodSEQ, InType>(
+                                               kTestParam, PPC_SETTINGS_afanasyev_a_integ_rect_method),
+                                           ppc::util::AddFuncTask<AfanasyevAIntegRectMethodOMP, InType>(
+                                               kTestParam, PPC_SETTINGS_afanasyev_a_integ_rect_method));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 

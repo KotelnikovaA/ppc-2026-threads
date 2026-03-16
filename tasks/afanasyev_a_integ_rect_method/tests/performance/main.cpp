@@ -41,7 +41,8 @@ TEST_P(AfanasyevAIntegRectMethodPerfTests, RunPerfModes) {
 namespace {
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, AfanasyevAIntegRectMethodSEQ, AfanasyevAIntegRectMethodOMP>(PPC_SETTINGS_afanasyev_a_integ_rect_method);
+    ppc::util::MakeAllPerfTasks<InType, AfanasyevAIntegRectMethodSEQ, AfanasyevAIntegRectMethodOMP>(
+        PPC_SETTINGS_afanasyev_a_integ_rect_method);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

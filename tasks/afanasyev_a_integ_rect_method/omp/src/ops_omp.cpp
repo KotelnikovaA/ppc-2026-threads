@@ -44,15 +44,12 @@ bool AfanasyevAIntegRectMethodOMP::RunImpl() {
 
   double sum = 0.0;
 
-#pragma omp parallel for collapse(3) reduction(+:sum) default(none) shared(n, h, k_dim)
+#pragma omp parallel for collapse(3) reduction(+ : sum) default(none) shared(n, h, k_dim)
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < n; ++j) {
       for (int k = 0; k < n; ++k) {
-        std::vector<double> x = {
-            (static_cast<double>(i) + 0.5) * h,
-            (static_cast<double>(j) + 0.5) * h,
-            (static_cast<double>(k) + 0.5) * h
-        };
+        std::vector<double> x = {(static_cast<double>(i) + 0.5) * h, (static_cast<double>(j) + 0.5) * h,
+                                 (static_cast<double>(k) + 0.5) * h};
         sum += ExampleIntegrand(x);
       }
     }
