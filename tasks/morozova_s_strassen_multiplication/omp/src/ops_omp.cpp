@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include "morozova_s_strassen_multiplication/common/include/common.hpp"
@@ -111,11 +112,6 @@ Matrix MultiplyStandardParallelImpl(const Matrix &a, const Matrix &b) {
   return result;
 }
 
-struct StrassenTempMatrices {
-  Matrix a11, a12, a21, a22;
-  Matrix b11, b12, b21, b22;
-};
-
 void ComputeStrassenLevel(const Matrix &a, const Matrix &b, Matrix &result, int leaf_size, int max_depth,
                           int current_depth) {
   int n = a.size;
@@ -127,9 +123,20 @@ void ComputeStrassenLevel(const Matrix &a, const Matrix &b, Matrix &result, int 
 
   int half = n / 2;
 
-  Matrix a11(half), a12(half), a21(half), a22(half);
-  Matrix b11(half), b12(half), b21(half), b22(half);
-  Matrix c11(half), c12(half), c21(half), c22(half);
+  Matrix a11(half);
+  Matrix a12(half);
+  Matrix a21(half);
+  Matrix a22(half);
+
+  Matrix b11(half);
+  Matrix b12(half);
+  Matrix b21(half);
+  Matrix b22(half);
+
+  Matrix c11(half);
+  Matrix c12(half);
+  Matrix c21(half);
+  Matrix c22(half);
 
   SplitMatrixImpl(a, a11, a12, a21, a22);
   SplitMatrixImpl(b, b11, b12, b21, b22);
@@ -200,7 +207,9 @@ void ComputeStrassenLevel(const Matrix &a, const Matrix &b, Matrix &result, int 
       }
     }
   } else {
-    Matrix temp1, temp2, temp_result;
+    Matrix temp1;
+    Matrix temp2;
+    Matrix temp_result;
 
     temp1 = SubtractMatrixImpl(b12, b22);
     ComputeStrassenLevel(a11, temp1, temp_result, leaf_size, max_depth, current_depth + 1);
