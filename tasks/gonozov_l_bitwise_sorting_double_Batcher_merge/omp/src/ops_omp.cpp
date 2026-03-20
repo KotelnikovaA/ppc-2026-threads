@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "gonozov_l_bitwise_sorting_double_Batcher_merge/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace gonozov_l_bitwise_sorting_double_batcher_merge {
 
@@ -113,7 +112,7 @@ void BatcherOddEvenMergeIterative(std::vector<double> &arr, size_t n) {
   n = std::min(n, arr.size());
   // Сначала сливаем блоки размером 1, потом 2, потом 4 и т.д.
   for (size_t len = 2; len <= n; len *= 2) {
-#pragma omp parallel for
+#pragma omp parallel for default(none) shared(arr, n, len) private(i)
     for (size_t i = 0; i < n; i += len) {
       MergingHalves(arr, i, len);
     }
@@ -144,7 +143,7 @@ void HybridSortDouble(std::vector<double> &data) {
   std::vector<double> right(data.begin() + static_cast<ptrdiff_t>(mid), data.end());
 
 // Сортируем каждую половину поразрядно
-#pragma omp parallel sections
+#pragma omp parallel sections default(none) shared(left, right)
   {
 #pragma omp section
     {
