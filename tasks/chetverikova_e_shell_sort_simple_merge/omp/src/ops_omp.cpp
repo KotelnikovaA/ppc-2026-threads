@@ -84,7 +84,6 @@ bool ChetverikovaEShellSortSimpleMergeOMP::RunImpl() {
   for (size_t i = 1; i < counts_parts; ++i) {
     std::ptrdiff_t next_end = static_cast<std::ptrdiff_t>(ind_parts[i + 1]);
     std::inplace_merge(output.begin(), output.begin() + current_end, output.begin() + next_end);
-
     current_end = next_end;
   }
 
