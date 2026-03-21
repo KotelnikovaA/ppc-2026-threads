@@ -6,7 +6,6 @@
 #include <tuple>
 
 #include "kosolapov_v_calc_mult_integrals_m_rectangles/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace kosolapov_v_calc_mult_integrals_m_rectangles {
 
@@ -92,7 +91,7 @@ double KosolapovVCalcMultIntegralsMRectanglesOMP::RectanglesIntegral(int func_id
   double hx = (b - a) / steps;
   double hy = (d - c) / steps;
   double result = 0.0;
-#pragma omp parallel for reduction(+ : result)
+#pragma omp parallel for reduction(+ : result) default(none)
   for (int i = 0; i < steps; i++) {
     double x = a + ((i + 0.5) * hx);
     for (int j = 0; j < steps; j++) {
