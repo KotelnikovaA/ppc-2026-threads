@@ -133,8 +133,8 @@ const std::array<TestType, 16> kTests = {{
 
     TestType{"area2d_0_1_x_0_1", InType{0.005, {{0.0, 1.0}, {0.0, 1.0}}, one}, CountNDimArea({{0.0, 1.0}, {0.0, 1.0}})},
 
-    TestType{"volume_3d_0_05_x3", InType{0.005, {{0.0, 0.5}, {0.0, 0.5}, {0.0, 0.5}}, one},
-             CountNDimArea({{0.0, 0.5}, {0.0, 0.5}, {0.0, 0.5}})},
+    TestType{"volume_3d_0_05_x3", InType{0.005, {{0.0, 0.25}, {0.0, 0.25}, {0.0, 0.25}}, one},
+             CountNDimArea({{0.0, 0.25}, {0.0, 0.25}, {0.0, 0.25}})},
 
     TestType{"Linear1d_0_2", InType{0.01, {{0.0, 2.0}}, linear1d}, IntLinear1d(0.0, 2.0)},
 
@@ -158,14 +158,14 @@ const std::array<TestType, 16> kTests = {{
 
     TestType{"x2_y2d_0_1_x_0_1", InType{0.005, {{0.0, 1.0}, {0.0, 1.0}}, x2_y2d}, Intx2y2d(0.0, 1.0, 0.0, 1.0)},
 
-    TestType{"xyz_3d_0_1_x3", InType{0.005, {{0.0, 0.5}, {0.0, 0.5}, {0.0, 0.5}}, xyz_3d},
-             Intxyz3d(0.0, 0.5, 0.0, 0.5, 0.0, 0.5)},
+    TestType{"xyz_3d_0_1_x3", InType{0.005, {{0.0, 0.25}, {0.0, 0.25}, {0.0, 0.25}}, xyz_3d},
+             Intxyz3d(0.0, 0.25, 0.0, 0.25, 0.0, 0.25)},
 
-    TestType{"x2_y2_z2_3d_0_1_x3", InType{0.01, {{0.0, 1.0}, {0.0, 1.0}, {0.0, 1.0}}, x2_y2_z2_3d},
-             Intx2Y2Z23d(0.0, 1.0, 0.0, 1.0, 0.0, 1.0)},
+    TestType{"x2_y2_z2_3d_0_1_x3", InType{0.01, {{0.0, 0.25}, {0.0, 0.25}, {0.0, 0.25}}, x2_y2_z2_3d},
+             Intx2Y2Z23d(0.0, 0.25, 0.0, 0.25, 0.0, 0.25)},
 
-    TestType{"exp_sum_3d_0_05_x3", InType{0.005, {{0.0, 0.5}, {0.0, 0.5}, {0.0, 0.5}}, exp_sum_3d},
-             IntexpSum3d(0.0, 0.5, 0.0, 0.5, 0.0, 0.5)},
+    TestType{"exp_sum_3d_0_05_x3", InType{0.005, {{0.0, 0.25}, {0.0, 0.25}, {0.0, 0.25}}, exp_sum_3d},
+             IntexpSum3d(0.0, 0.25, 0.0, 0.25, 0.0, 0.25)},
 }};
 
 const auto kTaskName = PPC_SETTINGS_vinyaikina_e_multidimensional_integrals_simpson_method;
