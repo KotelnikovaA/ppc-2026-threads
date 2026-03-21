@@ -9,7 +9,7 @@
 #include "moskaev_v_lin_filt_block_gauss_3/common/include/common.hpp"
 
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 namespace moskaev_v_lin_filt_block_gauss_3 {
@@ -35,7 +35,7 @@ void MoskaevVLinFiltBlockGauss3OMP::ApplyGaussianFilterToBlock(const std::vector
   int inner_width = block_width - 2;
   int inner_height = block_height - 2;
 
-  #pragma omp parallel for collapse(3) schedule(static) default(none) \
+#pragma omp parallel for collapse(3) schedule(static) default(none) \
     shared(input_block, output_block, inner_width, inner_height, channels, block_width)
   for (int row = 0; row < inner_height; ++row) {
     for (int col = 0; col < inner_width; ++col) {
@@ -63,9 +63,9 @@ namespace {
 void CopyBlockWithPadding(const std::vector<uint8_t> &source_image, std::vector<uint8_t> &padded_block, int width,
                           int height, int channels, int block_x, int block_y, int current_block_width,
                           int current_block_height, int block_with_padding_width) {
-  #pragma omp parallel for collapse(2) schedule(static) default(none) \
-    shared(source_image, padded_block, width, height, channels, block_x, block_y, \
-           current_block_width, current_block_height, block_with_padding_width)
+#pragma omp parallel for collapse(2) schedule(static) default(none)                                    \
+    shared(source_image, padded_block, width, height, channels, block_x, block_y, current_block_width, \
+               current_block_height, block_with_padding_width)
   for (int row = -1; row <= current_block_height; ++row) {
     for (int col = -1; col <= current_block_width; ++col) {
       int src_y = std::clamp(block_y + row, 0, height - 1);
@@ -85,8 +85,8 @@ void CopyBlockWithPadding(const std::vector<uint8_t> &source_image, std::vector<
 void CopyProcessedBlockToOutput(const std::vector<uint8_t> &processed_block, std::vector<uint8_t> &output_image,
                                 int width, int channels, int block_x, int block_y, int current_block_width,
                                 int current_block_height) {
-  #pragma omp parallel for collapse(2) schedule(static) default(none) \
-    shared(processed_block, output_image, width, channels, block_x, block_y, current_block_width, current_block_height)
+#pragma omp parallel for collapse(2) schedule(static) default(none) shared( \
+        processed_block, output_image, width, channels, block_x, block_y, current_block_width, current_block_height)
   for (int row = 0; row < current_block_height; ++row) {
     for (int col = 0; col < current_block_width; ++col) {
       for (int channel = 0; channel < channels; ++channel) {
@@ -116,7 +116,7 @@ bool MoskaevVLinFiltBlockGauss3OMP::RunImpl() {
 
   GetOutput().resize(static_cast<size_t>(width) * static_cast<size_t>(height) * static_cast<size_t>(channels));
 
-  #pragma omp parallel for collapse(2) schedule(dynamic) default(none) \
+#pragma omp parallel for collapse(2) schedule(dynamic) default(none) \
     shared(height, width, channels, image_data, block_size)
   for (int block_y = 0; block_y < height; block_y += block_size) {
     for (int block_x = 0; block_x < width; block_x += block_size) {
@@ -132,8 +132,7 @@ bool MoskaevVLinFiltBlockGauss3OMP::RunImpl() {
                                        0);
 
       std::vector<uint8_t> output_block(static_cast<size_t>(current_block_width) *
-                                            static_cast<size_t>(current_block_height) *
-                                            static_cast<size_t>(channels),
+                                            static_cast<size_t>(current_block_height) * static_cast<size_t>(channels),
                                         0);
 
       CopyBlockWithPadding(image_data, input_block, width, height, channels, block_x, block_y, current_block_width,
