@@ -1,6 +1,8 @@
 #include "../../omp/include/ops_omp.hpp"
 
+#include <algorithm>
 #include <complex>
+#include <utility>
 #include <vector>
 
 #include "omp.h"
@@ -60,7 +62,9 @@ bool ShvetsovaKMultMatrixComplexOMP::RunImpl() {
         }
       }
 
-      for (int index = 0; index < static_cast<int>(column_c.size()); ++index) {
+#include <utility>
+
+      for (int index = 0; std::cmp_less(index, column_c.size()); ++index) {
         if (column_c[index].real() != 0.0 || column_c[index].imag() != 0.0) {
           columns_c[i].rows.push_back(index);
           columns_c[i].vals.push_back(column_c[index]);
