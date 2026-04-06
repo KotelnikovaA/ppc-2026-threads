@@ -19,11 +19,8 @@ BorunovVComplexCcsOMP::BorunovVComplexCcsOMP(const InType &in) {
 }
 
 bool BorunovVComplexCcsOMP::ValidationImpl() {
-  if (GetInput().size() != 2) {
-    return false;
-  }
-  const auto &a = GetInput()[0];
-  const auto &b = GetInput()[1];
+  const auto &a = GetInput().first;
+  const auto &b = GetInput().second;
   if (a.num_cols != b.num_rows) {
     return false;
   }
@@ -35,8 +32,8 @@ bool BorunovVComplexCcsOMP::ValidationImpl() {
 }
 
 bool BorunovVComplexCcsOMP::PreProcessingImpl() {
-  const auto &a = GetInput()[0];
-  const auto &b = GetInput()[1];
+  const auto &a = GetInput().first;
+  const auto &b = GetInput().second;
   auto &c = GetOutput()[0];
 
   c.num_rows = a.num_rows;
@@ -49,8 +46,8 @@ bool BorunovVComplexCcsOMP::PreProcessingImpl() {
 }
 
 bool BorunovVComplexCcsOMP::RunImpl() {
-  const auto &a = GetInput()[0];
-  const auto &b = GetInput()[1];
+  const auto &a = GetInput().first;
+  const auto &b = GetInput().second;
   auto &c = GetOutput()[0];
 
   const int num_threads = ppc::util::GetNumThreads();
