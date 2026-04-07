@@ -92,6 +92,35 @@ void BuildPairs(std::vector<std::pair<int, int>> &pairs, int num_threads, int st
   }
 }
 
+// Вспомогательная функция для снижения когнитивной сложности
+void ExecuteMergeStep(std::vector<int> &output, const std::vector<int> &offsets,
+                      const std::vector<std::pair<int, int>> &pairs, int actual_threads) {
+  int num_pairs = static_cast<int>(pairs.size());
+  int chunk_size = (num_pairs + actual_threads - 1) / actual_threads;
+  std::vector<std::thread> threads;
+  threads.reserve(actual_threads);
+
+  for (int thread_idx = 0; thread_idx < actual_threads; ++thread_idx) {
+    int start = thread_idx * chunk_size;
+    int end = std::min(start + chunk_size, num_pairs);
+
+    if (start < end) {
+      threads.emplace_back([start, end, &output, &offsets, &pairs]() {
+        for (int idx = start; idx < end; ++idx) {
+          int block_a = pairs[idx].first;
+          int block_b = pairs[idx].second;
+          CompareSplit(output, offsets[block_a], offsets[block_a + 1] - offsets[block_a], offsets[block_b],
+                       offsets[block_b + 1] - offsets[block_b]);
+        }
+      });
+    }
+  }
+
+  for (auto &th : threads) {
+    th.join();
+  }
+}
+
 void BatcherMergePhase(std::vector<int> &output, const std::vector<int> &offsets, int num_threads, int hw_threads) {
   for (int step_p = 1; step_p < num_threads; step_p *= 2) {
     for (int step_k = step_p; step_k > 0; step_k /= 2) {
@@ -103,31 +132,8 @@ void BatcherMergePhase(std::vector<int> &output, const std::vector<int> &offsets
         continue;
       }
 
-      // Ручное распределение итераций цикла по потокам (chunking)
       int actual_threads = std::min(hw_threads, num_pairs);
-      int chunk_size = (num_pairs + actual_threads - 1) / actual_threads;
-      std::vector<std::thread> threads;
-
-      for (int t = 0; t < actual_threads; ++t) {
-        int start = t * chunk_size;
-        int end = std::min(start + chunk_size, num_pairs);
-
-        if (start < end) {
-          threads.emplace_back([start, end, &output, &offsets, &pairs]() {
-            for (int idx = start; idx < end; ++idx) {
-              int block_a = pairs[idx].first;
-              int block_b = pairs[idx].second;
-              CompareSplit(output, offsets[block_a], offsets[block_a + 1] - offsets[block_a], offsets[block_b],
-                           offsets[block_b + 1] - offsets[block_b]);
-            }
-          });
-        }
-      }
-
-      // Ожидание завершения всех потоков на текущем шаге слияния
-      for (auto &th : threads) {
-        th.join();
-      }
+      ExecuteMergeStep(output, offsets, pairs, actual_threads);
     }
   }
 }
@@ -186,6 +192,8 @@ bool HoareSortBatcherSTL::RunImpl() {
 
   // Параллельный запуск сортировок локальных блоков
   std::vector<std::thread> sort_threads;
+  sort_threads.reserve(t);  // Предварительное выделение памяти для векторов
+
   for (int i = 0; i < t; ++i) {
     sort_threads.emplace_back([&output, &offsets, i]() { QuickSortHoare(output, offsets[i], offsets[i + 1] - 1); });
   }
