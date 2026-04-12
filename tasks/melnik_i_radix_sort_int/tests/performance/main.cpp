@@ -54,8 +54,9 @@ TEST_P(MelnikIRadixSortIntPerfTests, SortPerformance) {
 
 namespace {
 
-const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, MelnikIRadixSortIntSEQ, MelnikIRadixSortIntOMP, MelnikIRadixSortIntTBB>(
-    PPC_SETTINGS_melnik_i_radix_sort_int);
+const auto kAllPerfTasks =
+    ppc::util::MakeAllPerfTasks<InType, MelnikIRadixSortIntSEQ, MelnikIRadixSortIntOMP, MelnikIRadixSortIntTBB>(
+        PPC_SETTINGS_melnik_i_radix_sort_int);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
