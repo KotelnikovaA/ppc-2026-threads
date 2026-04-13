@@ -89,4 +89,29 @@ void RemizovKDenseMatrixMultiplicationCannonAlgorithmTbb::ShiftBlocksUp(
   });
 }
 
+void RemizovKDenseMatrixMultiplicationCannonAlgorithmTbb::RunCannonCycle(
+    std::vector<std::vector<std::vector<std::vector<double>>>> &a_blocks,
+    std::vector<std::vector<std::vector<std::vector<double>>>> &b_blocks,
+    std::vector<std::vector<std::vector<std::vector<double>>>> &c_blocks,
+    int block_size,
+    int block_count) {
+  for (int step = 0; step < block_count; ++step) {
+    // Parallel multiplication of all block pairs
+    tbb::parallel_for(
+        tbb::blocked_range2d<int>(0, block_count, 0, block_count),
+        [&](const tbb::blocked_range2d<int> &r) {
+          for (int i = r.rows().begin(); i != r.rows().end(); ++i) {
+            for (int j = r.cols().begin(); j != r.cols().end(); ++j) {
+              MultiplyBlock(a_blocks[i][j], b_blocks[i][j], c_blocks[i][j], block_size);
+            }
+          }
+        });
+
+    if (step < block_count - 1) {
+      ShiftBlocksLeft(a_blocks, block_count);
+      ShiftBlocksUp(b_blocks, block_count);
+    }
+  }
+}
+
 }  // namespace remizov_k_dense_matrix_multiplication_cannon_algorithm
