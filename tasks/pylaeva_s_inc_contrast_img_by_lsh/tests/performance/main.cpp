@@ -47,8 +47,8 @@ TEST_P(PylaevaSRunPerfTestThreads, RunPerfModes) {
 namespace {
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, PylaevaSIncContrastImgByLshSEQ, PylaevaSIncContrastImgByLshOMP, PylaevaSIncContrastImgByLshTBB>(
-        PPC_SETTINGS_pylaeva_s_inc_contrast_img_by_lsh);
+    ppc::util::MakeAllPerfTasks<InType, PylaevaSIncContrastImgByLshSEQ, PylaevaSIncContrastImgByLshOMP,
+                                PylaevaSIncContrastImgByLshTBB>(PPC_SETTINGS_pylaeva_s_inc_contrast_img_by_lsh);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
