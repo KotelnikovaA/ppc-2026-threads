@@ -186,20 +186,11 @@ class MarkingComponentsFuncTest : public ppc::util::BaseRunFuncTests<InType, Out
       image.width = 1;
       image.height = 5;
     } else if (type == "merge_labels") {
-      image.data = {0, 1, 0,
-                    0, 0, 0,
-                    1, 1, 1};
+      image.data = {0, 1, 0, 0, 0, 0, 1, 1, 1};
       image.width = 3;
       image.height = 3;
     } else if (type == "boundary_bridge") {
-      image.data = {1, 0, 1,
-                    1, 0, 1,
-                    1, 0, 1,
-                    1, 0, 1,
-                    1, 0, 1,
-                    1, 0, 1,
-                    1, 0, 1,
-                    1, 0, 1};
+      image.data = {1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1};
       image.width = 3;
       image.height = 8;
     } else if (type == "large_complex") {
@@ -216,12 +207,12 @@ TEST_P(MarkingComponentsFuncTest, VariousBinaryImages) {
 }
 
 const std::array<TestType, 13> kTestParam = {
-    std::make_tuple(0, "zero_width"),        std::make_tuple(1, "zero_height"),
-    std::make_tuple(2, "empty"),             std::make_tuple(3, "one_component"),
-    std::make_tuple(4, "isolated_pixels"),   std::make_tuple(5, "two_regions"),
-    std::make_tuple(6, "u_shape"),           std::make_tuple(7, "complex"),
-    std::make_tuple(8, "single_row_gaps"),   std::make_tuple(9, "single_column_gaps"),
-    std::make_tuple(10, "merge_labels"),     std::make_tuple(11, "boundary_bridge"),
+    std::make_tuple(0, "zero_width"),      std::make_tuple(1, "zero_height"),
+    std::make_tuple(2, "empty"),           std::make_tuple(3, "one_component"),
+    std::make_tuple(4, "isolated_pixels"), std::make_tuple(5, "two_regions"),
+    std::make_tuple(6, "u_shape"),         std::make_tuple(7, "complex"),
+    std::make_tuple(8, "single_row_gaps"), std::make_tuple(9, "single_column_gaps"),
+    std::make_tuple(10, "merge_labels"),   std::make_tuple(11, "boundary_bridge"),
     std::make_tuple(12, "large_complex")};
 
 const auto kTestTasksList = std::tuple_cat(
